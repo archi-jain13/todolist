@@ -158,7 +158,7 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ## 📞 Support
 
-For support, email your.email@example.com or open an issue in the repository.
+For support, email archijain148@gmail.com or open an issue in the repository.
 
 ---
 
