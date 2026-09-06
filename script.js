@@ -30,15 +30,20 @@ function saveLocalTasks(tasksToSave) {
 }
 
 async function api(path, options = {}) {
-    const response = await fetch(path, {
-        headers: { "Content-Type": "application/json" },
-        ...options,
-    });
-    if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        throw new Error(error.error || "The server request failed");
+    try {
+        const response = await fetch(path, {
+            headers: { "Content-Type": "application/json" },
+            ...options,
+        });
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            throw new Error(error.error || "The server request failed");
+        }
+        return await response.json();
+    } catch (e) {
+        console.warn("API request failed:", path, e);
+        return null;
     }
-    return response.json();
 }
 
 async function loadTasks() {
