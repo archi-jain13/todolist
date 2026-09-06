@@ -62,7 +62,7 @@ module.exports = async function handler(request, response) {
           return sendJson(response, 400, { error: "Task text is required" });
         }
 
-        const task = { id: crypto.randomUUID(), text, done: false };
+        const task = { id: body.id || crypto.randomUUID(), text, done: false };
         tasks.unshift(task);
         await writeTasks(tasks);
         return sendJson(response, 201, task);

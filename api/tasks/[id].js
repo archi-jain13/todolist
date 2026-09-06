@@ -44,7 +44,7 @@ async function readBody(request) {
 
 module.exports = async function handler(request, response) {
   const url = new URL(request.url, `https://${request.headers.host || "localhost"}`);
-  const taskId = url.pathname.split("/").filter(Boolean).pop();
+  const taskId = request.query?.id || url.pathname.split("/").filter(Boolean).pop();
 
   if (!taskId) {
     return sendJson(response, 404, { error: "Task not found" });

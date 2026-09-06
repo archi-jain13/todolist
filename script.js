@@ -2,6 +2,8 @@ let tasks = [];
 let filter = "All";
 let editingId = null;
 
+const STORAGE_KEY = "quickdo_tasks";
+
 const listEl = document.getElementById("task-list");
 const formEl = document.getElementById("task-form");
 const inputEl = document.getElementById("task-input");
@@ -9,6 +11,23 @@ const countPill = document.getElementById("count-pill");
 const listFooter = document.getElementById("list-footer");
 const doneSummary = document.getElementById("done-summary");
 const clearBtn = document.getElementById("clear-completed");
+
+function getLocalTasks() {
+    try {
+        const data = localStorage.getItem(STORAGE_KEY);
+        return data ? JSON.parse(data) : null;
+    } catch {
+        return null;
+    }
+}
+
+function saveLocalTasks(tasksToSave) {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(tasksToSave));
+    } catch (e) {
+        console.error("Failed to save tasks to local storage", e);
+    }
+}
 
 async function api(path, options = {}) {
     const response = await fetch(path, {
@@ -23,47 +42,85 @@ async function api(path, options = {}) {
 }
 
 async function loadTasks() {
-    try {
-        tasks = await api("/api/tasks");
+    const cached = getLocalTasks();
+    if (cached) {
+        tasks = cached;
         render();
+    }
+
+    try {
+        const remoteTasks = await api("/api/tasks");
+        if (Array.isArray(remoteTasks) && remoteTasks.length > 0) {
+            tasks = remoteTasks;
+            saveLocalTasks(tasks);
+            render();
+        } else if (!cached) {
+            tasks = [];
+            render();
+        }
     } catch (error) {
-        listEl.innerHTML = "";
-        const message = document.createElement("div");
-        message.className = "empty-state";
-        message.textContent = "Could not connect to the task server. Start it with npm start.";
-        listEl.appendChild(message);
-        console.error(error);
+        console.warn("API load failed, falling back to local storage", error);
+        if (!cached) {
+            tasks = [];
+            render();
+        }
     }
 }
 
 async function addTask() {
     const text = inputEl.value.trim();
     if (!text) return;
-    const task = await api("/api/tasks", {
-        method: "POST",
-        body: JSON.stringify({ text }),
-    });
-    tasks.unshift(task);
+
+    const newTask = {
+        id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
+        text,
+        done: false,
+    };
+
+    tasks.unshift(newTask);
     inputEl.value = "";
+    saveLocalTasks(tasks);
     render();
     inputEl.focus();
+
+    try {
+        await api("/api/tasks", {
+            method: "POST",
+            body: JSON.stringify({ id: newTask.id, text }),
+        });
+    } catch (error) {
+        console.warn("API addTask failed, task saved locally", error);
+    }
 }
 
 async function toggleTask(id) {
     const task = tasks.find(item => item.id === id);
     if (!task) return;
-    const updatedTask = await api(`/api/tasks/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ done: !task.done }),
-    });
-    tasks = tasks.map(item => item.id === id ? updatedTask : item);
+
+    task.done = !task.done;
+    saveLocalTasks(tasks);
     render();
+
+    try {
+        await api(`/api/tasks/${id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ done: task.done }),
+        });
+    } catch (error) {
+        console.warn("API toggleTask failed, changes saved locally", error);
+    }
 }
 
 async function deleteTask(id) {
-    await api(`/api/tasks/${id}`, { method: "DELETE" });
     tasks = tasks.filter(task => task.id !== id);
+    saveLocalTasks(tasks);
     render();
+
+    try {
+        await api(`/api/tasks/${id}`, { method: "DELETE" });
+    } catch (error) {
+        console.warn("API deleteTask failed, deleted locally", error);
+    }
 }
 
 function startEdit(id) {
@@ -78,13 +135,23 @@ async function commitEdit(id, value) {
         editingId = null;
         return;
     }
-    const updatedTask = await api(`/api/tasks/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ text }),
-    });
-    tasks = tasks.map(task => task.id === id ? updatedTask : task);
+
+    const task = tasks.find(item => item.id === id);
+    if (task) {
+        task.text = text;
+        saveLocalTasks(tasks);
+    }
     editingId = null;
     render();
+
+    try {
+        await api(`/api/tasks/${id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ text }),
+        });
+    } catch (error) {
+        console.warn("API commitEdit failed, saved locally", error);
+    }
 }
 
 function render() {
@@ -167,8 +234,15 @@ formEl.addEventListener("submit", event => {
 });
 
 clearBtn.onclick = async () => {
-    tasks = await api("/api/tasks?completed=true", { method: "DELETE" });
+    tasks = tasks.filter(task => !task.done);
+    saveLocalTasks(tasks);
     render();
+
+    try {
+        await api("/api/tasks?completed=true", { method: "DELETE" });
+    } catch (error) {
+        console.warn("API clearCompleted failed, cleared locally", error);
+    }
 };
 
 document.querySelectorAll(".filter-btn").forEach(button => {
