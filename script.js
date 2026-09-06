@@ -88,7 +88,11 @@ async function commitEdit(id, value) {
 }
 
 function render() {
-    const visible = tasks.filter(task => filter === "Done" ? task.done : !task.done);
+    const visible = tasks.filter(task => {
+        if (filter === "Active") return !task.done;
+        if (filter === "Done") return task.done;
+        return true;
+    });
     const activeCount = tasks.filter(task => !task.done).length;
     const doneCount = tasks.length - activeCount;
 
