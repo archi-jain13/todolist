@@ -1,167 +1,120 @@
-# 📝 TodoList Application
+# QuickDo
 
-A simple and intuitive Todo List application built with HTML, CSS, and JavaScript. This application allows users to manage their daily tasks efficiently with a clean and responsive interface.
+QuickDo is a lightweight task manager with a focused web interface and a small Node.js backend. Create, edit, complete, filter, and delete tasks while keeping them persisted in a local JSON file.
 
-## 🌟 Features
+## Features
 
-- ✅ **Add Tasks** - Quickly add new tasks to your todo list
-- ✏️ **Edit Tasks** - Modify existing tasks easily
-- 🗑️ **Delete Tasks** - Remove completed or unwanted tasks
-- ✔️ **Mark as Complete** - Check off completed tasks
-- 💾 **Local Storage** - Tasks persist even after browser refresh
-- 📱 **Responsive Design** - Works seamlessly on desktop, tablet, and mobile devices
-- 🎨 **Modern UI** - Clean and user-friendly interface
+- Add tasks from the main input or by pressing Enter
+- Mark tasks as complete and review completion progress
+- Edit task text inline with keyboard support
+- Delete individual tasks or clear completed tasks
+- Filter the list by All, Active, or Done
+- Persist tasks across browser refreshes and server restarts
+- Responsive layout for desktop and mobile screens
 
-## 🚀 Technologies Used
+## Built With
 
-- **HTML5** - Structure and content
-- **CSS3** - Styling and animations
-- **JavaScript (ES6)** - Functionality and interactivity
-- **LocalStorage API** - Data persistence
+- HTML5
+- CSS3
+- Vanilla JavaScript
+- Node.js built-in `http`, `fs`, `path`, and `crypto` modules
 
-## 📂 Project Structure
+No external npm dependencies are required.
 
-```
-todolist/
-│
-├── index.html          # Main HTML file
-├── style.css           # Stylesheet
-├── script.js           # JavaScript logic
-└── README.md           # Project documentation
-```
+## Getting Started
 
-## 🛠️ Installation & Setup
+### Prerequisites
 
-1. **Clone or Download** the project:
+- Node.js installed locally
+
+### Run locally
+
+1. Clone or download this repository.
+2. Open a terminal in the project directory.
+3. Start the server:
+
    ```bash
-   cd "C:\Users\pc\OneDrive\Desktop\web designing lab\todolist"
+   npm start
    ```
 
-2. **Open the application**:
-   - Simply open `index.html` in your web browser
-   - Or use Live Server extension in VS Code
+4. Open [http://localhost:3000](http://localhost:3000) in a browser.
 
-3. **Start using**:
-   - No installation or dependencies required!
+The server uses port `3000` by default. Set the `PORT` environment variable to use another port.
 
-## 💻 Usage
+```powershell
+$env:PORT=4000
+npm start
+```
 
-### Adding a Task
-1. Type your task in the input field
-2. Press "Enter" or click the "Add" button
-3. Task will appear in the list below
+Tasks are stored in `tasks.json`, which is created or updated by the server as changes are made.
 
-### Completing a Task
-- Click on the task or checkbox to mark it as complete
-- Completed tasks will have a strikethrough effect
+## API Reference
 
-### Editing a Task
-- Click the edit icon (✏️) next to the task
-- Modify the task text
-- Press "Enter" or click save to update
+All API responses use JSON.
 
-### Deleting a Task
-- Click the delete icon (🗑️) next to the task
-- Task will be permanently removed
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `GET` | `/api/tasks` | Return all tasks |
+| `POST` | `/api/tasks` | Create a task |
+| `PATCH` | `/api/tasks/:id` | Update task text or completion state |
+| `DELETE` | `/api/tasks/:id` | Delete one task |
+| `DELETE` | `/api/tasks?completed=true` | Delete all completed tasks |
 
-### Clearing All Tasks
-- Click the "Clear All" button to remove all tasks at once
+### Request examples
 
-## 🎯 Features in Detail
+Create a task:
 
-### Data Persistence
-- All tasks are automatically saved to browser's LocalStorage
-- Tasks remain available even after closing the browser
-- No database or backend required
-
-### Responsive Design
-- Mobile-first approach
-- Adapts to different screen sizes
-- Touch-friendly interface
-
-### User Experience
-- Smooth animations and transitions
-- Visual feedback for all interactions
-- Intuitive and clean interface
-- Keyboard shortcuts support
-
-## 🎨 Customization
-
-### Changing Colors
-Edit the CSS variables in `style.css`:
-
-```css
-:root {
-  --primary-color: #667eea;
-  --secondary-color: #764ba2;
-  --background-color: #0f0c29;
-  --text-color: #ffffff;
+```json
+{
+  "text": "Prepare the project update"
 }
 ```
 
-### Modifying Functionality
-Edit `script.js` to add new features or modify existing behavior.
+Update a task:
 
-## 🌐 Browser Compatibility
+```json
+{
+  "done": true
+}
+```
 
-- ✅ Chrome (recommended)
-- ✅ Firefox
-- ✅ Safari
-- ✅ Edge
-- ✅ Opera
+Tasks returned by the API have this shape:
 
-## 📱 Screenshots
+```json
+{
+  "id": "task-id",
+  "text": "Prepare the project update",
+  "done": false
+}
+```
 
-*Add screenshots of your application here*
+## Project Structure
 
-## 🔮 Future Enhancements
+```text
+.
+├── todolist.html   # Application entry point
+├── style.css       # Layout and visual styles
+├── script.js       # Client-side task interactions
+├── server.js       # Static file server and task API
+├── tasks.json      # Local task data
+├── package.json    # Project metadata and start script
+└── README.md       # Project documentation
+```
 
-- [ ] Task categories/tags
-- [ ] Priority levels
-- [ ] Due dates and reminders
-- [ ] Search and filter functionality
-- [ ] Dark/Light theme toggle
-- [ ] Export tasks to PDF/CSV
-- [ ] Task statistics and analytics
-- [ ] Drag and drop reordering
-- [ ] Subtasks support
+## Development Notes
 
-## 🐛 Known Issues
+- Run `npm start` whenever you work on the application so the frontend can reach the task API.
+- The backend validates task text and returns JSON errors for invalid requests.
+- Changes to `tasks.json` are persistent and may appear in version control. Decide whether local task data should be committed before opening a pull request.
 
-- None currently reported
+## Contributing
 
-## 🤝 Contributing
+Bug reports, improvements, and feature proposals are welcome. For a change:
 
-Contributions, issues, and feature requests are welcome!
+1. Create a feature branch.
+2. Make the change and verify it locally.
+3. Open a pull request with a clear description of the behavior changed.
 
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+## License
 
-## 📝 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
-## 👨‍💻 Author
-
-**Your Name**
-- GitHub: [@archi-jain13](https://github.com/archi-jain13)
-- Email: archijain148@gmail.com
-
-## 🙏 Acknowledgments
-
-- Icons from [Font Awesome](https://fontawesome.com/)
-- Inspiration from modern task management apps
-- Web design best practices
-
-## 📞 Support
-
-For support, email archijain148@gmail.com or open an issue in the repository.
-
----
-
-**Made with ❤️ for better productivity**
-
-⭐ Star this repository if you find it helpful!
+QuickDo is intended for personal, non-commercial use. No formal license file is currently included in this repository; add one before redistributing the project or using it under explicit open-source terms.
